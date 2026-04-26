@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meme_oni — HCI Case Study</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#13131e;--surface:#1a1a28;
+      --border:rgba(139,92,246,0.15);--border2:rgba(255,255,255,0.06);
+      --purple:#a855f7;--purple-l:#c084fc;--pink:#ec4899;--pink-l:#f472b6;
+      --cyan:#22d3ee;--text:#f1f0f5;--text2:#a09aba;--text3:#5c5a72;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;line-height:1.6;overflow-x:hidden;}
+    ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px;}
+    .font-syne{font-family:'Syne',sans-serif;}.font-mono{font-family:'DM Mono',monospace;}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:0.5;}
+    .orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+    .orb-1{width:500px;height:500px;background:radial-gradient(circle,rgba(168,85,247,0.11) 0%,transparent 70%);top:-100px;right:-100px;}
+    .orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(236,72,153,0.07) 0%,transparent 70%);bottom:20%;left:-100px;}
+    .orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(34,211,238,0.05) 0%,transparent 70%);top:60%;right:5%;}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:.85rem 2.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border2);background:rgba(10,10,15,0.88);backdrop-filter:blur(20px);}
+    .nav-logo{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;background:linear-gradient(135deg,var(--purple-l),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .nav-links{display:flex;gap:1.5rem;flex-wrap:wrap;}
+    .nav-links a{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.12em;color:var(--text2);text-decoration:none;text-transform:uppercase;transition:color .2s;}
+    .nav-links a:hover{color:var(--purple-l);}
+    .nav-badge{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;border:1px solid var(--border);padding:.28rem .7rem;border-radius:999px;}
+
+    /* LAYOUT */
+    .section-wrap{position:relative;z-index:1;}
+    .sticky-label{position:sticky;top:57px;z-index:50;padding:.8rem 2.5rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border2);background:rgba(10,10,15,0.94);backdrop-filter:blur(24px);}
+    .lbl-num{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--purple);letter-spacing:.15em;text-transform:uppercase;}
+    .lbl-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;}
+    .lbl-line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .65s cubic-bezier(.16,1,.3,1),transform .65s cubic-bezier(.16,1,.3,1);}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    .reveal-delay-1{transition-delay:.1s;}.reveal-delay-2{transition-delay:.2s;}.reveal-delay-3{transition-delay:.3s;}.reveal-delay-4{transition-delay:.4s;}.reveal-delay-5{transition-delay:.5s;}
+
+    /* GRADIENTS */
+    .grad-purple{background:linear-gradient(135deg,var(--purple-l) 0%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .grad-cyan{background:linear-gradient(135deg,var(--cyan) 0%,var(--purple-l) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+    /* PILLS & TAGS */
+    .pill{display:inline-flex;align-items:center;gap:.4rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .75rem;border-radius:999px;border:1px solid var(--border);color:var(--purple-l);background:rgba(168,85,247,0.08);}
+    .pill-pink{color:var(--pink-l);background:rgba(236,72,153,0.08);border-color:rgba(236,72,153,0.2);}
+    .pill-cyan{color:var(--cyan);background:rgba(34,211,238,0.08);border-color:rgba(34,211,238,0.2);}
+    .tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.18rem .55rem;border-radius:4px;background:rgba(168,85,247,0.12);color:var(--purple-l);border:1px solid rgba(168,85,247,0.2);}
+
+    /* CARDS */
+    .card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:1.75rem;position:relative;overflow:hidden;transition:border-color .3s,transform .3s;}
+    .card:hover{border-color:rgba(168,85,247,0.3);transform:translateY(-2px);}
+    .card::before{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(168,85,247,0.04) 0%,transparent 60%);pointer-events:none;}
+    .card-glow{box-shadow:0 0 0 1px rgba(168,85,247,0.2),0 20px 60px rgba(168,85,247,0.08);}
+    .card-glow-pink{box-shadow:0 0 0 1px rgba(236,72,153,0.2),0 20px 60px rgba(236,72,153,0.08);}
+    .card-glow-cyan{box-shadow:0 0 0 1px rgba(34,211,238,0.2),0 20px 60px rgba(34,211,238,0.08);}
+
+    /* BAR CHARTS */
+    .bar-item{display:flex;flex-direction:column;gap:.35rem;}
+    .bar-label-row{display:flex;justify-content:space-between;align-items:baseline;font-size:.75rem;color:var(--text2);}
+    .bar-pct{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--purple-l);}
+    .bar-track{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:3px;transform-origin:left;transform:scaleX(0);transition:transform 1.1s cubic-bezier(.16,1,.3,1);background:linear-gradient(90deg,var(--purple),var(--pink));}
+    .bar-fill-cyan{background:linear-gradient(90deg,var(--cyan),var(--purple));}
+
+    /* DONUTS */
+    .donut-wrap{position:relative;width:100px;height:100px;flex-shrink:0;}
+    .donut-wrap svg{transform:rotate(-90deg);}
+    .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .donut-num{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;line-height:1;}
+    .donut-sub{font-family:'DM Mono',monospace;font-size:.46rem;color:var(--text3);text-align:center;margin-top:2px;line-height:1.3;}
+
+    /* BUTTONS */
+    .snap-btn{display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 1.75rem;border-radius:12px;text-decoration:none;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;transition:all .25s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;}
+    .snap-btn:hover{transform:scale(1.03);}
+    .snap-btn-primary{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;box-shadow:0 0 40px rgba(168,85,247,0.35),0 4px 20px rgba(168,85,247,0.2);}
+    .snap-btn-secondary{background:linear-gradient(135deg,#ff6b35,#ffcc02);color:#1a1a1a;box-shadow:0 0 40px rgba(255,204,2,0.25),0 4px 20px rgba(255,204,2,0.15);}
+    .figma-btn{display:inline-flex;align-items:center;gap:.7rem;padding:.9rem 1.75rem;border-radius:12px;text-decoration:none;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;transition:all .25s;background:linear-gradient(135deg,#1abcfe,#0acf83);color:#fff;box-shadow:0 0 40px rgba(26,188,254,0.3);}
+    .figma-btn:hover{transform:scale(1.03);box-shadow:0 0 60px rgba(26,188,254,0.45);}
+
+    /* MAPPING */
+    .map-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:1.25rem;padding:1.1rem 0;border-bottom:1px solid var(--border2);}
+    .map-row:last-child{border-bottom:none;}
+    .map-pain{font-size:.82rem;color:var(--text2);line-height:1.55;}
+    .map-arrow{color:var(--purple);font-size:1rem;flex-shrink:0;padding-top:2px;}
+    .map-solution{font-size:.82rem;color:var(--text);line-height:1.55;}
+
+    /* WIREFRAMES */
+    .wf-frame{background:var(--bg3);border:1px solid var(--border2);border-radius:16px;overflow:hidden;aspect-ratio:9/16;position:relative;box-shadow:0 20px 80px rgba(0,0,0,0.5);transition:transform .3s;}
+    .wf-frame:hover{transform:scale(1.02);}
+    .wf-phone-bar{height:34px;background:var(--surface);display:flex;align-items:center;justify-content:center;gap:6px;}
+    .wf-dot{width:6px;height:6px;border-radius:50%;}
+
+    /* POUR */
+    .pour-letter{font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--purple-l),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+    /* STATS */
+    .stat-num{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;line-height:1;}
+
+    /* MISC */
+    .pull-quote{border-left:3px solid var(--purple);padding:1rem 1.5rem;background:rgba(168,85,247,0.05);border-radius:0 8px 8px 0;}
+    .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 0 10px rgba(168,85,247,0.5);}
+    .tl-line{flex:1;width:1px;background:var(--border2);min-height:28px;}
+    .hero-grid{position:absolute;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(139,92,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.04) 1px,transparent 1px);background-size:60px 60px;}
+    .divider-line{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);}
+    footer{position:relative;z-index:1;border-top:1px solid var(--border2);padding:2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+
+    /* FIGMA EMBED */
+    .figma-embed-wrap{position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(26,188,254,0.25);box-shadow:0 0 0 1px rgba(26,188,254,0.1),0 40px 100px rgba(0,0,0,0.6),0 0 80px rgba(26,188,254,0.08);background:var(--bg3);}
+    .figma-embed-wrap iframe{display:block;width:100%;border:none;}
+    .figma-header{background:rgba(13,13,20,0.95);padding:.85rem 1.25rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid rgba(26,188,254,0.15);}
+    .figma-dot{width:10px;height:10px;border-radius:50%;}
+
+    /* PERSONA CARDS */
+    .persona-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;transition:all .3s;}
+    .persona-card:hover{border-color:rgba(168,85,247,0.35);transform:translateY(-3px);}
+    .persona-header{padding:1.5rem 1.75rem 1rem;border-bottom:1px solid var(--border2);}
+    .persona-body{padding:1.25rem 1.75rem 1.5rem;}
+    .persona-row{display:flex;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border2);font-size:.8rem;}
+    .persona-row:last-child{border-bottom:none;}
+    .persona-label{color:var(--text3);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;min-width:90px;padding-top:.1rem;}
+    .persona-val{color:var(--text2);line-height:1.55;}
+
+    /* HEURISTIC */
+    .heuristic-card{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:1.25rem 1.5rem;transition:all .3s;position:relative;overflow:hidden;}
+    .heuristic-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--purple),var(--pink));}
+    .heuristic-card:hover{border-color:rgba(168,85,247,0.3);transform:translateX(4px);}
+    .h-num{font-family:'DM Mono',monospace;font-size:.58rem;color:var(--purple);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.3rem;}
+    .h-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.4rem;}
+    .h-body{font-size:.78rem;color:var(--text2);line-height:1.6;}
+
+    /* INFO ARCH */
+    .ia-node{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:.7rem 1.1rem;font-size:.78rem;text-align:center;transition:all .3s;}
+    .ia-node:hover{border-color:rgba(168,85,247,0.4);background:rgba(168,85,247,0.08);}
+    .ia-root{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(236,72,153,0.1));border-color:rgba(168,85,247,0.4);font-weight:700;font-family:'Syne',sans-serif;}
+    .ia-level{background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.25);}
+    .ia-leaf{background:rgba(255,255,255,0.02);border-color:var(--border2);font-size:.72rem;color:var(--text2);}
+    .ia-connector{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:.8rem;}
+
+    @media(max-width:768px){
+      .nav-links{display:none;}
+      .map-row{grid-template-columns:1fr;}.map-arrow{display:none;}
+      .sticky-label{padding:.7rem 1rem;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">MEME_ONI</span>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#personas">Personas</a>
+    <a href="#data">Data</a>
+    <a href="#mapping">Mapping</a>
+    <a href="#ideation">Wireframes</a>
+    <a href="#figma">Figma</a>
+    <a href="#heuristics">Heuristics</a>
+    <a href="#ia">Architecture</a>
+    <a href="#solution">Solution</a>
+  </div>
+  <span class="nav-badge">HCI · 2024</span>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="section-wrap min-h-screen flex flex-col justify-center relative pt-16" id="hero">
+  <div class="hero-grid"></div>
+  <div class="relative z-10 max-w-6xl mx-auto px-10 py-24">
+
+    <div class="reveal mb-5 flex items-center gap-3 flex-wrap">
+      <span class="pill">HCI Technical Report</span>
+      <span class="pill pill-pink">AR + Snapchat Lens Studio</span>
+      <span class="pill pill-cyan">Low-Resource Language Preservation</span>
+    </div>
+
+    <h1 class="reveal reveal-delay-1 font-syne font-extrabold leading-none mb-6"
+        style="font-size:clamp(3.5rem,9vw,8rem);letter-spacing:-.02em;">
+      MEME<span class="grad-purple">_ONI</span>
+    </h1>
+
+    <p class="reveal reveal-delay-2 max-w-2xl mb-4"
+       style="font-size:clamp(1rem,2vw,1.2rem);color:var(--text2);line-height:1.75;">
+      Preserving <span style="color:var(--text);">Memoni</span> — a low-resource Indo-Aryan language of Sindh —
+      through <span style="color:var(--purple-l);font-weight:600;">augmented reality Snapchat lenses</span>
+      built in Lens Studio for Gen Z heritage learners.
+    </p>
+
+    <p class="reveal reveal-delay-3 text-sm mb-12 font-mono" style="color:var(--text3);letter-spacing:.08em;">
+      Sabrina Akbar · JUW46633 · Jinnah University for Women · Dept. of CS &amp; SE
+    </p>
+
+    <div class="reveal reveal-delay-4 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl">
+      <div class="card card-glow text-center">
+        <div class="stat-num grad-purple">3</div>
+        <div class="font-mono mt-2" style="font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">AR Lenses</div>
+      </div>
+      <div class="card text-center">
+        <div class="stat-num" style="color:var(--cyan);">750M</div>
+        <div class="font-mono mt-2" style="font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Snap Users</div>
+      </div>
+      <div class="card text-center">
+        <div class="stat-num grad-purple">5</div>
+        <div class="font-mono mt-2" style="font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Issues Fixed</div>
+      </div>
+      <div class="card card-glow-pink text-center">
+        <div class="stat-num" style="color:var(--pink-l);">AA</div>
+        <div class="font-mono mt-2" style="font-size:.65rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">WCAG 2.2</div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-5 mt-14 flex items-center gap-3" style="color:var(--text3);">
+      <div style="width:1px;height:44px;background:linear-gradient(to bottom,var(--purple),transparent);"></div>
+      <span class="font-mono" style="font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;">Scroll to explore</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 01 PROBLEM SPACE ═══════════════════ -->
+<section class="section-wrap" id="problem">
+  <div class="sticky-label">
+    <span class="lbl-num">01</span>
+    <span class="lbl-title">The Problem Space</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Empathy Map</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        What Our Users<br/><span class="grad-purple">Think, Feel &amp; Do</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">Research uncovered a critical gap: Memoni is a living language with zero accessible digital learning pathways. Empathy mapping surfaced four deep patterns.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-14">
+      <div class="card reveal">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--purple);"></div>
+          <span class="font-mono" style="font-size:.62rem;color:var(--purple-l);letter-spacing:.12em;text-transform:uppercase;">Think &amp; Feel</span>
+        </div>
+        <ul style="display:flex;flex-direction:column;gap:.75rem;">
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--purple);flex-shrink:0;margin-top:1px;">→</span>
+            <span><em style="color:var(--text);">"My language is dying and nobody cares."</em> — heritage guilt and cultural anxiety are pervasive among diaspora Gen Z.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--purple);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Embarrassed to speak Memoni incorrectly in front of elders; fear of being judged for mispronunciation.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--purple);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Anxious the language will disappear within one generation if nothing changes.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--purple);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Desire to connect with grandparents, but no bridge between English/Urdu and Memoni.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card reveal reveal-delay-1">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--pink);"></div>
+          <span class="font-mono" style="font-size:.62rem;color:var(--pink-l);letter-spacing:.12em;text-transform:uppercase;">See</span>
+        </div>
+        <ul style="display:flex;flex-direction:column;gap:.75rem;">
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--pink);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Peers on Snapchat for <strong style="color:var(--text);">2+ hours daily</strong> — AR filters used for entertainment, never education.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--pink);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Absolutely zero apps, websites, or digital tools that teach Memoni at any level.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--pink);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Older relatives speaking a language they can't access or participate in meaningfully.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--pink);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Apps like Duolingo exist for major languages — nothing for Memoni or similar low-resource languages.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card reveal reveal-delay-2">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--cyan);"></div>
+          <span class="font-mono" style="font-size:.62rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;">Say &amp; Do</span>
+        </div>
+        <ul style="display:flex;flex-direction:column;gap:.75rem;">
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--cyan);flex-shrink:0;margin-top:1px;">→</span>
+            <span><em style="color:var(--text);">"I wish there was a Duolingo for Memoni."</em> — repeatedly surfaced across research conversations.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--cyan);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Prefers <strong style="color:var(--text);">micro-learning in 5-minute bursts</strong> — commute, queue, or idle moments.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--cyan);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Motivated by streaks, social sharing, and visible progress — gamification is non-negotiable.</span>
+          </li>
+          <li style="display:flex;align-items:flex-start;gap:.75rem;font-size:.82rem;color:var(--text2);">
+            <span style="color:var(--cyan);flex-shrink:0;margin-top:1px;">→</span>
+            <span>Comfortable with AR filters in entertainment — learning via AR is a paradigm shift they're ready for.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card reveal reveal-delay-3">
+        <div class="flex items-center gap-2 mb-4">
+          <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;"></div>
+          <span class="font-mono" style="font-size:.62rem;color:#fbbf24;letter-spacing:.12em;text-transform:uppercase;">Pains &amp; Gains</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="font-mono mb-3" style="font-size:.6rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Pains</div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;">
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.15);">No Memoni digital tools</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.15);">Textbooks feel irrelevant</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.15);">Cannot afford tutor</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.15);">Low-vision exclusion</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.15);">Script unfamiliar to diaspora</div>
+            </div>
+          </div>
+          <div>
+            <div class="font-mono mb-3" style="font-size:.6rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Gains</div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;">
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.15);">Heritage reconnection</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.15);">Cultural pride &amp; identity</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.15);">Family communication</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.15);">Social sharing &amp; pride</div>
+              <div style="font-size:.72rem;padding:.25rem .6rem;border-radius:4px;background:rgba(34,197,94,0.1);color:#86efac;border:1px solid rgba(34,197,94,0.15);">Language preservation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="pull-quote max-w-2xl">
+        <p style="font-size:.95rem;font-style:italic;color:var(--text2);line-height:1.75;">"The erosion of heritage languages accelerates dramatically when the community's youth do not have accessible, contemporary media through which to engage with the language."</p>
+        <p class="font-mono mt-2" style="font-size:.62rem;color:var(--text3);letter-spacing:.08em;">— UNESCO Atlas of the World's Languages in Danger</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 02 USER PERSONAS ═══════════════════ -->
+<section class="section-wrap" id="personas">
+  <div class="sticky-label">
+    <span class="lbl-num">02</span>
+    <span class="lbl-title">User Personas</span>
+    <div class="lbl-line"></div>
+    <span class="tag">User Research</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Who We're<br/><span class="grad-cyan">Designing For</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">Two primary personas were constructed from field research to anchor every design decision in real, observable human needs.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Persona 1 -->
+      <div class="persona-card reveal card-glow">
+        <div class="persona-header">
+          <div class="flex items-center gap-3 mb-3">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(168,85,247,0.4),rgba(236,72,153,0.3));display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:1px solid var(--border);">👩‍🎓</div>
+            <div>
+              <div class="font-syne font-bold" style="font-size:1.1rem;">Zoya Memon</div>
+              <div class="font-mono" style="font-size:.62rem;color:var(--purple-l);letter-spacing:.1em;text-transform:uppercase;">GenZ Heritage Learner · 24</div>
+            </div>
+          </div>
+          <span class="pill">Primary Persona</span>
+        </div>
+        <div class="persona-body">
+          <div class="persona-row">
+            <span class="persona-label">Background</span>
+            <span class="persona-val">Second-generation Pakistani-British student at university. Grew up hearing Memoni from grandparents but never formally learned it. Fluent in English and Urdu.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Goals</span>
+            <span class="persona-val">Reconnect with heritage before visiting family in Karachi. Prefers 5-minute micro-learning bursts that fit her commute.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Pain Points</span>
+            <span class="persona-val">No Memoni apps exist. Embarrassed by mispronunciation. Textbooks feel irrelevant. Cannot afford private tutor.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Tech Use</span>
+            <span class="persona-val">Snapchat 2+ hrs/day. Comfortable with AR filters. Motivated by streaks and progress indicators.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Accessibility</span>
+            <span class="persona-val">Standard mobile usability — small screen, varying outdoor lighting conditions.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Persona 2 -->
+      <div class="persona-card reveal reveal-delay-2 card-glow-pink">
+        <div class="persona-header">
+          <div class="flex items-center gap-3 mb-3">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(236,72,153,0.4),rgba(245,158,11,0.3));display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:1px solid rgba(236,72,153,0.2);">👨‍💻</div>
+            <div>
+              <div class="font-syne font-bold" style="font-size:1.1rem;">Bilal Siddiqui</div>
+              <div class="font-mono" style="font-size:.62rem;color:var(--pink-l);letter-spacing:.1em;text-transform:uppercase;">Low Vision User · 24</div>
+            </div>
+          </div>
+          <span class="pill pill-pink">Secondary Persona</span>
+        </div>
+        <div class="persona-body">
+          <div class="persona-row">
+            <span class="persona-label">Background</span>
+            <span class="persona-val">Postgraduate student with low vision (6/60 acuity in stronger eye). Uses VoiceOver on iOS. Enjoys Snapchat's audio and haptic features.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Goals</span>
+            <span class="persona-val">Learn Memoni to communicate with elderly relatives. Needs a fully audio-navigable experience that doesn't require reading small text.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Pain Points</span>
+            <span class="persona-val">Most apps present vocabulary as text-only overlays. Audio not auto-triggered. Contrast ratios often fail WCAG AA.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Tech Use</span>
+            <span class="persona-val">VoiceOver on iOS. Relies on audio descriptions and voice commands. Prefers audio-first where visuals are supplementary.</span>
+          </div>
+          <div class="persona-row">
+            <span class="persona-label">Accessibility</span>
+            <span class="persona-val">Auto-triggered audio; min 4.5:1 contrast ratio; haptic feedback on correct answers; screen-reader-compatible Lens metadata.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 03 DATA INSIGHTS ═══════════════════ -->
+<section class="section-wrap" id="data">
+  <div class="sticky-label">
+    <span class="lbl-num">03</span>
+    <span class="lbl-title">Data Insights</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Research Findings</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Usability Research<br/><span class="grad-cyan">at a Glance</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">Three participants across distinct profiles surfaced five critical issues in testing. All issues were verified as resolved in post-iteration sessions.</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 reveal">
+      <div class="card text-center"><div class="stat-num grad-purple">3</div><div class="font-mono mt-2" style="font-size:.62rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Participants</div></div>
+      <div class="card text-center"><div class="stat-num" style="color:var(--pink-l);">5</div><div class="font-mono mt-2" style="font-size:.62rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Issues Found</div></div>
+      <div class="card text-center"><div class="stat-num" style="color:var(--cyan);">100%</div><div class="font-mono mt-2" style="font-size:.62rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Resolved</div></div>
+      <div class="card text-center"><div class="stat-num grad-purple">5.2:1</div><div class="font-mono mt-2" style="font-size:.62rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;">Final Contrast</div></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+      <div class="card reveal" id="chart-wrap-1">
+        <div class="font-mono mb-6" style="font-size:.62rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;">Usability Issues Identified</div>
+        <div style="display:flex;flex-direction:column;gap:1.1rem;">
+          <div class="bar-item"><div class="bar-label-row"><span>Flashcard contrast in outdoor lighting</span><span class="bar-pct">P1, P2</span></div><div class="bar-track"><div class="bar-fill" data-w="0.9"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Audio trigger unclear on first launch</span><span class="bar-pct">P2</span></div><div class="bar-track"><div class="bar-fill" data-w="0.6"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Roman text confused as English word</span><span class="bar-pct">P3</span></div><div class="bar-track"><div class="bar-fill" data-w="0.5"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Tile spacing too tight on small screens</span><span class="bar-pct">P1</span></div><div class="bar-track"><div class="bar-fill" data-w="0.4"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Level completion CTA not prominent</span><span class="bar-pct">P3</span></div><div class="bar-track"><div class="bar-fill" data-w="0.35"></div></div></div>
+        </div>
+      </div>
+
+      <div class="card reveal reveal-delay-1" id="chart-wrap-2">
+        <div class="font-mono mb-6" style="font-size:.62rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;">Post-Iteration Resolution Rate</div>
+        <div style="display:flex;flex-direction:column;gap:1.1rem;">
+          <div class="bar-item"><div class="bar-label-row"><span>Opacity 70%→88%, contrast 5.2:1</span><span class="bar-pct" style="color:var(--cyan);">100%</span></div><div class="bar-track"><div class="bar-fill bar-fill-cyan" data-w="1.0"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Pulsing speaker icon on first launch</span><span class="bar-pct" style="color:var(--cyan);">100%</span></div><div class="bar-track"><div class="bar-fill bar-fill-cyan" data-w="1.0"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Added "Pronunciation" label above text</span><span class="bar-pct" style="color:var(--cyan);">100%</span></div><div class="bar-track"><div class="bar-fill bar-fill-cyan" data-w="1.0"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Tile height 36pt→48pt, gap doubled</span><span class="bar-pct" style="color:var(--cyan);">100%</span></div><div class="bar-track"><div class="bar-fill bar-fill-cyan" data-w="1.0"></div></div></div>
+          <div class="bar-item"><div class="bar-label-row"><span>Teal CTA with celebratory animation</span><span class="bar-pct" style="color:var(--cyan);">100%</span></div><div class="bar-track"><div class="bar-fill bar-fill-cyan" data-w="1.0"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 reveal reveal-delay-2">
+      <div class="card flex items-center gap-5">
+        <div class="donut-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="url(#gp1)" stroke-width="9" stroke-dasharray="238.8" stroke-dashoffset="24" stroke-linecap="round"/>
+            <defs><linearGradient id="gp1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#ec4899"/></linearGradient></defs>
+          </svg>
+          <div class="donut-center"><div class="donut-num grad-purple">90%</div><div class="donut-sub">accessibility-<br/>related issues</div></div>
+        </div>
+        <div><div style="font-size:.88rem;font-weight:600;margin-bottom:.25rem;">Accessibility-First</div><div style="font-size:.75rem;color:var(--text2);">4 of 5 issues directly affected users with sensory differences.</div></div>
+      </div>
+      <div class="card flex items-center gap-5">
+        <div class="donut-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="url(#gc1)" stroke-width="9" stroke-dasharray="238.8" stroke-dashoffset="48" stroke-linecap="round"/>
+            <defs><linearGradient id="gc1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs>
+          </svg>
+          <div class="donut-center"><div class="donut-num grad-cyan">80%</div><div class="donut-sub">GenZ daily<br/>Snap usage</div></div>
+        </div>
+        <div><div style="font-size:.88rem;font-weight:600;margin-bottom:.25rem;">Platform Fit</div><div style="font-size:.75rem;color:var(--text2);">Target users already on Snapchat — zero friction to reach them.</div></div>
+      </div>
+      <div class="card flex items-center gap-5">
+        <div class="donut-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="9"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="url(#gpk1)" stroke-width="9" stroke-dasharray="238.8" stroke-dashoffset="0" stroke-linecap="round"/>
+            <defs><linearGradient id="gpk1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ec4899"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient></defs>
+          </svg>
+          <div class="donut-center"><div class="donut-num" style="color:var(--pink-l);">100%</div><div class="donut-sub">issues confirmed<br/>resolved</div></div>
+        </div>
+        <div><div style="font-size:.88rem;font-weight:600;margin-bottom:.25rem;">Full Resolution</div><div style="font-size:.75rem;color:var(--text2);">P2 and P3 both verified their issues were fixed in follow-up sessions.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 04 MAPPING ═══════════════════ -->
+<section class="section-wrap" id="mapping">
+  <div class="sticky-label">
+    <span class="lbl-num">04</span>
+    <span class="lbl-title">Pain → Solution Mapping</span>
+    <div class="lbl-line"></div>
+    <span class="tag">AR Design Response</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        From Pain Point<br/><span class="grad-purple">to AR Solution</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">Each problem identified during research maps directly to a design decision embedded in the AR lens suite built in Lens Studio.</p>
+    </div>
+
+    <div class="reveal grid mb-2" style="grid-template-columns:1fr auto 1fr;gap:1.25rem;padding:0 1.75rem;">
+      <div class="font-mono" style="font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;">User Pain Point</div>
+      <div></div>
+      <div class="font-mono" style="font-size:.6rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;">AR Design Solution</div>
+    </div>
+
+    <div class="card reveal" style="padding:0 1.75rem;">
+      <div class="map-row">
+        <div class="map-pain">Zero digital tools for learning Memoni — heritage speakers have no tech pathway.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;">Meme_oni L1–L3</span> Three scaffolded Snapchat lenses — vocabulary, sentences, counting. The first-ever digital Memoni learning tools.</div>
+      </div>
+      <div class="map-row">
+        <div class="map-pain">Textbooks are boring and irrelevant; Gen Z needs micro-learning habits met.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;">Flashcard AR</span> "Card on head" mimics the Heads Up game — playful, social, completable in 5 minutes, shareable to Stories.</div>
+      </div>
+      <div class="map-row">
+        <div class="map-pain">Low vision users excluded — text-only overlays, no auto audio, WCAG contrast failures.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;border-color:rgba(236,72,153,0.3);color:var(--pink-l);">Accessibility</span> Audio-first model, full-screen tap (Fitts's Law), contrast 5.2:1 (WCAG AA+), pulsing speaker cue on launch.</div>
+      </div>
+      <div class="map-row">
+        <div class="map-pain">Memoni script unfamiliar to diaspora — Roman transliteration mistaken for English.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;border-color:rgba(34,211,238,0.3);color:var(--cyan);">Dual Coding</span> Memoni script + phonetic Roman transliteration shown simultaneously, with explicit "Pronunciation" label.</div>
+      </div>
+      <div class="map-row">
+        <div class="map-pain">Users unsure when they've completed a level or how to advance.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;">Visibility (H1)</span> Dot-based pagination, instant card-swap feedback, redesigned teal "Unlock Level 2" CTA with celebration animation.</div>
+      </div>
+      <div class="map-row">
+        <div class="map-pain">Memoni perceived as an "old people's" language with no modern digital presence.</div>
+        <div class="map-arrow">⟶</div>
+        <div class="map-solution"><span class="tag" style="font-size:.58rem;margin-right:6px;">Cultural Pride</span> HD paper-texture AR aesthetics + Snapchat Story sharing — learning Memoni becomes visible, social, and cool.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 05 WIREFRAMES ═══════════════════ -->
+<section class="section-wrap" id="ideation">
+  <div class="sticky-label">
+    <span class="lbl-num">05</span>
+    <span class="lbl-title">Ideation &amp; Wireframes</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Lo-Fi Design Process</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        From Sketch<br/><span class="grad-purple">to High-Fidelity</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">The design process moved through low-fidelity wireframes to a full Figma prototype, applying HCI principles at each iteration pass.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <!-- Screen 1 -->
+      <div class="reveal" style="display:flex;flex-direction:column;gap:.75rem;">
+        <div class="wf-frame">
+          <div class="wf-phone-bar"><div class="wf-dot" style="background:#ff5f57;"></div><div class="wf-dot" style="background:#febc2e;"></div><div class="wf-dot" style="background:#28c840;"></div></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;height:calc(100% - 34px);background:var(--bg3);">
+            <div style="height:70px;background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(236,72,153,0.2));border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,0.5);"></div></div>
+            <div style="height:11px;background:var(--surface);border-radius:4px;width:65%;"></div>
+            <div style="height:9px;background:var(--surface);border-radius:4px;width:45%;"></div>
+            <div style="height:38px;background:var(--surface);border-radius:6px;border:1px solid var(--border);"></div>
+            <div style="height:38px;background:var(--surface);border-radius:6px;border:1px solid var(--border);"></div>
+            <div style="height:42px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:8px;display:flex;align-items:center;justify-content:center;"><div style="height:9px;width:55px;background:rgba(255,255,255,0.5);border-radius:3px;"></div></div>
+            <div style="flex:1;"></div>
+            <div style="height:9px;background:var(--border2);border-radius:3px;width:75%;margin:0 auto;"></div>
+          </div>
+        </div>
+        <div><div class="font-syne font-bold" style="font-size:.9rem;margin-bottom:.2rem;">Signup Page</div><div style="font-size:.75rem;color:var(--text2);">Minimal onboarding — language selection and profile setup before entering the lens suite.</div></div>
+      </div>
+
+      <!-- Screen 2 -->
+      <div class="reveal reveal-delay-1" style="display:flex;flex-direction:column;gap:.75rem;">
+        <div class="wf-frame">
+          <div class="wf-phone-bar"><div class="wf-dot" style="background:#ff5f57;"></div><div class="wf-dot" style="background:#febc2e;"></div><div class="wf-dot" style="background:#28c840;"></div></div>
+          <div style="padding:1rem;display:flex;flex-direction:column;gap:.75rem;height:calc(100% - 34px);background:var(--bg3);">
+            <div style="height:10px;background:var(--surface);border-radius:3px;width:50%;"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+              <div style="aspect-ratio:1;background:var(--surface);border-radius:10px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;"><div style="width:26px;height:26px;border-radius:6px;background:rgba(168,85,247,0.3);"></div><div style="height:6px;width:38px;background:var(--border2);border-radius:2px;"></div></div>
+              <div style="aspect-ratio:1;background:var(--surface);border-radius:10px;border:1px solid rgba(236,72,153,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;"><div style="width:26px;height:26px;border-radius:6px;background:rgba(236,72,153,0.3);"></div><div style="height:6px;width:38px;background:var(--border2);border-radius:2px;"></div></div>
+              <div style="aspect-ratio:1;background:var(--surface);border-radius:10px;border:1px solid rgba(34,211,238,0.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;"><div style="width:26px;height:26px;border-radius:6px;background:rgba(34,211,238,0.2);"></div><div style="height:6px;width:38px;background:var(--border2);border-radius:2px;"></div></div>
+              <div style="aspect-ratio:1;background:rgba(168,85,247,0.06);border-radius:10px;border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;"><span style="color:var(--purple);font-size:1.1rem;">+</span></div>
+            </div>
+            <div style="height:38px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:8px;margin-top:auto;display:flex;align-items:center;justify-content:center;"><div style="height:8px;width:48px;background:rgba(255,255,255,0.5);border-radius:2px;"></div></div>
+          </div>
+        </div>
+        <div><div class="font-syne font-bold" style="font-size:.9rem;margin-bottom:.2rem;">Filter Page</div><div style="font-size:.75rem;color:var(--text2);">Grid of available lenses. Progressive unlock — completing Level 1 unlocks Level 2, and so on.</div></div>
+      </div>
+
+      <!-- Screen 3 -->
+      <div class="reveal reveal-delay-2" style="display:flex;flex-direction:column;gap:.75rem;">
+        <div class="wf-frame">
+          <div class="wf-phone-bar"><div class="wf-dot" style="background:#ff5f57;"></div><div class="wf-dot" style="background:#febc2e;"></div><div class="wf-dot" style="background:#28c840;"></div></div>
+          <div style="position:relative;height:calc(100% - 34px);background:linear-gradient(180deg,#1a1230 0%,#0d0a1a 100%);display:flex;flex-direction:column;">
+            <div style="flex:1;position:relative;overflow:hidden;">
+              <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:110px;height:150px;background:rgba(255,255,255,0.04);border-radius:55px 55px 35px 35px;"></div>
+              <div style="position:absolute;top:22%;left:50%;transform:translateX(-50%);background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);border-radius:8px;padding:9px 14px;min-width:120px;text-align:center;backdrop-filter:blur(8px);">
+                <div style="height:7px;background:rgba(168,85,247,0.5);border-radius:2px;width:55px;margin:0 auto 4px;"></div>
+                <div style="height:5px;background:rgba(255,255,255,0.2);border-radius:2px;width:75px;margin:0 auto 3px;"></div>
+                <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;width:45px;margin:0 auto;"></div>
+              </div>
+              <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:4px;">
+                <div style="width:14px;height:3px;border-radius:2px;background:var(--purple);"></div>
+                <div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.2);"></div>
+                <div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.2);"></div>
+                <div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.2);"></div>
+              </div>
+              <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,0.35);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;">Tap anywhere to learn</div>
+            </div>
+          </div>
+        </div>
+        <div><div class="font-syne font-bold" style="font-size:.9rem;margin-bottom:.2rem;">Meme_oni Filter (Active)</div><div style="font-size:.75rem;color:var(--text2);">AR flashcard sits above the user's head. Full-screen tap triggers TTS audio + advances card. Dot pagination tracks progress.</div></div>
+      </div>
+    </div>
+
+    <!-- POUR grid -->
+    <div class="reveal mb-4">
+      <h3 class="font-syne font-bold" style="font-size:1.3rem;margin-bottom:.4rem;">HCI Design Principles — <span class="grad-purple">POUR</span></h3>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:2rem;">Every design decision is grounded in the WCAG 2.2 POUR accessibility framework.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 reveal reveal-delay-1">
+      <div class="card"><div class="pour-letter mb-2">P</div><div class="font-syne font-bold mb-1" style="font-size:.9rem;">Perceivable</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Audio TTS + visual text. 5.2:1 contrast ratio. Real-time captions via Lens Studio's Caption feature.</div></div>
+      <div class="card"><div class="pour-letter mb-2" style="background:linear-gradient(135deg,#ec4899,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">O</div><div class="font-syne font-bold mb-1" style="font-size:.9rem;">Operable</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Full-screen tap (44×44pt min). No precision targeting. Single-handed. No time pressure.</div></div>
+      <div class="card"><div class="pour-letter mb-2" style="background:linear-gradient(135deg,#22d3ee,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">U</div><div class="font-syne font-bold mb-1" style="font-size:.9rem;">Understandable</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Short imperative instructions. Dual script + phonetic display. Dot pagination. Pronunciation labels on all cards.</div></div>
+      <div class="card"><div class="pour-letter mb-2" style="background:linear-gradient(135deg,#34d399,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">R</div><div class="font-syne font-bold mb-1" style="font-size:.9rem;">Robust</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Standard Lens Studio APIs. Audio pre-loaded locally — works offline. Tested iOS + Android, 4-year-old devices.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 06 FIGMA PROTOTYPE ═══════════════════ -->
+<section class="section-wrap" id="figma">
+  <div class="sticky-label">
+    <span class="lbl-num">06</span>
+    <span class="lbl-title">High-Fidelity Prototype</span>
+    <div class="lbl-line"></div>
+    <span class="tag" style="background:rgba(26,188,254,0.12);color:#1abcfe;border-color:rgba(26,188,254,0.25);">Figma</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-6">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Live Figma<br/><span style="background:linear-gradient(135deg,#1abcfe,#0acf83);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Prototype</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;margin-bottom:1.5rem;">The full high-fidelity design is hosted on Figma. Interact with the prototype directly below — click through screens, experience the navigation flow, and see the visual system in action.</p>
+      <a href="https://geo-evil-51434704.figma.site/" target="_blank" rel="noopener" class="figma-btn" style="font-size:.85rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Full Prototype in New Tab →
+      </a>
+    </div>
+
+    <!-- Figma Embed -->
+    <div class="figma-embed-wrap reveal reveal-delay-1">
+      <div class="figma-header">
+        <div class="figma-dot" style="background:#ff5f57;"></div>
+        <div class="figma-dot" style="background:#febc2e;"></div>
+        <div class="figma-dot" style="background:#28c840;"></div>
+        <div style="flex:1;"></div>
+        <span class="font-mono" style="font-size:.6rem;color:rgba(26,188,254,0.7);letter-spacing:.1em;text-transform:uppercase;">geo-evil-51434704.figma.site</span>
+        <div style="flex:1;"></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(26,188,254,0.6)" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </div>
+      <iframe
+        src="https://geo-evil-51434704.figma.site/"
+        title="Meme_oni Figma Prototype"
+        width="100%"
+        height="700"
+        loading="lazy"
+        allow="fullscreen"
+        style="border:none;display:block;background:var(--bg3);">
+      </iframe>
+    </div>
+
+    <div class="reveal reveal-delay-2 mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card" style="display:flex;gap:.75rem;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(26,188,254,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">🎨</div>
+        <div><div class="font-syne font-semibold" style="font-size:.85rem;margin-bottom:.2rem;">Visual Design System</div><div style="font-size:.73rem;color:var(--text2);">HD paper-texture AR overlays, magenta-pink typography, dark mode optimised for Snapchat camera feed.</div></div>
+      </div>
+      <div class="card" style="display:flex;gap:.75rem;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(26,188,254,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">📱</div>
+        <div><div class="font-syne font-semibold" style="font-size:.85rem;margin-bottom:.2rem;">Three-Screen Flow</div><div style="font-size:.73rem;color:var(--text2);">Signup → Filter Selection → Active Lens. Linear, learner-paced, zero dead ends.</div></div>
+      </div>
+      <div class="card" style="display:flex;gap:.75rem;align-items:flex-start;">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(26,188,254,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;">♿</div>
+        <div><div class="font-syne font-semibold" style="font-size:.85rem;margin-bottom:.2rem;">Accessibility Baked In</div><div style="font-size:.73rem;color:var(--text2);">Every screen meets WCAG 2.2 AA. Contrast checked, touch targets verified at 44×44pt minimum.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 07 HEURISTIC EVALUATION ═══════════════════ -->
+<section class="section-wrap" id="heuristics">
+  <div class="sticky-label">
+    <span class="lbl-num">07</span>
+    <span class="lbl-title">Heuristic Evaluation</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Nielsen's 10 Heuristics</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Evaluated Against<br/><span class="grad-purple">Nielsen's 10 Heuristics</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">Meme_oni was assessed against all 10 of Nielsen's usability heuristics. Below is a summary of how each principle is addressed in the design.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 reveal">
+      <div class="heuristic-card">
+        <div class="h-num">H1 · Visibility of System Status</div>
+        <div class="h-title">Always Know What's Happening</div>
+        <div class="h-body">Immediate audio + card-swap feedback on tap. "Tap to Learn" hint on open. Dot-based pagination shows progress at all times — users always know where they are.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H2 · Match Between System and Real World</div>
+        <div class="h-title">The "Heads Up" Metaphor</div>
+        <div class="h-body">Flashcard placed on head mirrors the universally understood "Heads Up" party game. Vocabulary anchored in culturally familiar objects — Chai, Dates, family terms.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H3 · User Control and Freedom</div>
+        <div class="h-title">Learner Controls the Pace</div>
+        <div class="h-body">Cards do not auto-advance. Users stay on each card as long as needed and click only when ready. No time pressure, no "rushed by technology" feeling.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H4 · Consistency and Standards</div>
+        <div class="h-title">Zero Learning Curve Across Levels</div>
+        <div class="h-body">Identical interface across all three lenses — front camera, card on head, full-screen tap. Once learned, the interaction model transfers instantly to any new level.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H5 · Error Prevention</div>
+        <div class="h-title">The Click-Anywhere Design</div>
+        <div class="h-body">Full-screen tap eliminates the possibility of a "missed click." No small buttons. No precision required. Major accessibility win for low-vision users and users in motion.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H6 · Recognition Rather Than Recall</div>
+        <div class="h-title">Everything Visible on Screen</div>
+        <div class="h-body">English translation and Memoni Romanised text always visible simultaneously. Users recognise visual + audio prompts — no memorisation of previous cards required.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H7 · Flexibility and Efficiency of Use</div>
+        <div class="h-title">One Tap — Maximum Efficiency</div>
+        <div class="h-body">The single-tap system serves both cautious new learners and experienced users who cycle quickly through known words. No mode-switching, no multiple interaction patterns.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H8 · Aesthetic and Minimalist Design</div>
+        <div class="h-title">Less Is More</div>
+        <div class="h-body">Screen kept clear — user's face and flashcard only. HD paper-texture overlays without frames or borders. AR elements never overwhelm the live camera feed.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H9 · Help Recover from Errors</div>
+        <div class="h-title">Continuous Loop — No Dead Ends</div>
+        <div class="h-body">Accidentally skip a card? Click through the circular deck to return. No complex back-buttons or navigation dead ends. Recovery requires zero technical knowledge.</div>
+      </div>
+      <div class="heuristic-card">
+        <div class="h-num">H10 · Help and Documentation</div>
+        <div class="h-title">Just-In-Time Instruction</div>
+        <div class="h-body">A single "Tap to Learn" prompt appears at the exact moment the lens opens. Because the interface is so simple, one instruction is sufficient — no manual or tutorial needed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 08 INFORMATION ARCHITECTURE ═══════════════════ -->
+<section class="section-wrap" id="ia">
+  <div class="sticky-label">
+    <span class="lbl-num">08</span>
+    <span class="lbl-title">Information Architecture</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Three-Tier Sitemap</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-3" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Three-Tier<br/><span class="grad-cyan">Information Hierarchy</span>
+      </h2>
+      <p style="color:var(--text2);max-width:580px;">The architecture mirrors the pedagogical scaffolding of the learning journey — minimising navigation complexity while providing a clear, linear path of progression.</p>
+    </div>
+
+    <!-- IA Diagram -->
+    <div class="reveal card" style="padding:2.5rem;">
+      <!-- Root -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div class="ia-node ia-root" style="padding:.9rem 2rem;min-width:200px;text-align:center;">
+          <div style="font-size:.6rem;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;">Entry Point</div>
+          <div style="font-size:1rem;">📱 Snapcode Scan</div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="width:1px;height:32px;background:linear-gradient(to bottom,var(--purple),var(--border2));"></div>
+      </div>
+
+      <!-- Level 1 — Signup & Filter -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;max-width:600px;margin-left:auto;margin-right:auto;">
+        <div class="ia-node ia-level" style="text-align:center;">
+          <div style="font-size:.6rem;color:var(--purple-l);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Screen 1</div>
+          <div style="font-weight:700;">👤 Signup Page</div>
+        </div>
+        <div class="ia-node ia-level" style="text-align:center;">
+          <div style="font-size:.6rem;color:var(--purple-l);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Screen 2</div>
+          <div style="font-weight:700;">🔍 Filter Selection</div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="width:1px;height:32px;background:linear-gradient(to bottom,var(--border2),var(--purple));"></div>
+      </div>
+
+      <!-- Level 2 — Three Lenses -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+        <div class="ia-node ia-level" style="text-align:center;border-color:rgba(168,85,247,0.35);">
+          <div style="font-size:.58rem;color:var(--purple-l);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Level 1</div>
+          <div style="font-weight:700;font-size:.85rem;">📚 Vocabulary</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:.25rem;">Meme_oni</div>
+        </div>
+        <div class="ia-node ia-level" style="text-align:center;border-color:rgba(236,72,153,0.35);">
+          <div style="font-size:.58rem;color:var(--pink-l);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Level 2</div>
+          <div style="font-weight:700;font-size:.85rem;">💬 Sentences</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:.25rem;">Meme_oni</div>
+        </div>
+        <div class="ia-node ia-level" style="text-align:center;border-color:rgba(34,211,238,0.35);">
+          <div style="font-size:.58rem;color:var(--cyan);font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Level 3</div>
+          <div style="font-weight:700;font-size:.85rem;">🔢 Counting</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:.25rem;">Memonix</div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem;">
+        <div style="width:1px;height:32px;background:linear-gradient(to bottom,var(--border2),rgba(168,85,247,0.3));"></div>
+      </div>
+
+      <!-- Level 3 — Content -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;">
+        <div class="ia-node ia-leaf" style="text-align:center;">AR Flashcard<br/><span style="color:var(--purple-l);">↑ Full-screen tap</span></div>
+        <div class="ia-node ia-leaf" style="text-align:center;">TTS Audio<br/><span style="color:var(--purple-l);">↑ Auto-triggered</span></div>
+        <div class="ia-node ia-leaf" style="text-align:center;">Dot Pagination<br/><span style="color:var(--purple-l);">↑ Progress track</span></div>
+        <div class="ia-node ia-leaf" style="text-align:center;">Completion CTA<br/><span style="color:var(--purple-l);">↑ Unlock next level</span></div>
+        <div class="ia-node ia-leaf" style="text-align:center;">Story Share<br/><span style="color:var(--purple-l);">↑ Social output</span></div>
+      </div>
+
+      <!-- Legend -->
+      <div style="display:flex;gap:1.5rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border2);flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:var(--text3);">
+          <div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(236,72,153,0.1));border:1px solid rgba(168,85,247,0.4);"></div> Entry / Root
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:var(--text3);">
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);"></div> Navigation Layer
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:var(--text3);">
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,0.02);border:1px solid var(--border2);"></div> Content / Feature
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- ═══════════════════ 09 FINAL SOLUTION ═══════════════════ -->
+<section class="section-wrap" id="solution">
+  <div class="sticky-label">
+    <span class="lbl-num">09</span>
+    <span class="lbl-title">The Final Solution</span>
+    <div class="lbl-line"></div>
+    <span class="tag">Built in Lens Studio</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-10 py-20">
+    <div class="reveal mb-4">
+      <span class="font-mono" style="font-size:.62rem;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;">Developed in Snapchat Lens Studio</span>
+    </div>
+    <div class="reveal mb-12">
+      <h2 class="font-syne font-bold mb-4" style="font-size:clamp(1.8rem,4vw,3rem);">
+        Two AR Filters.<br/><span class="grad-purple">One Language Saved.</span>
+      </h2>
+      <p style="color:var(--text2);max-width:600px;">Meme_oni and Memonix are the first-ever interactive digital tools for learning Memoni. Both built in <strong style="color:var(--text);">Snapchat Lens Studio</strong> — scan a Snapcode and start learning in seconds. No download. No account. No barrier.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+      <div class="card card-glow reveal" style="padding:2.25rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;">
+          <div>
+            <div class="pill mb-3">Levels 1 &amp; 2</div>
+            <h3 class="font-syne font-extrabold" style="font-size:2rem;letter-spacing:-.02em;">Meme_oni</h3>
+            <p style="font-size:.82rem;color:var(--text2);margin-top:.2rem;">Vocabulary &amp; Sentence Construction</p>
+          </div>
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(236,72,153,0.2));display:flex;align-items:center;justify-content:center;border:1px solid var(--border);font-size:1.4rem;flex-shrink:0;">👻</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.75rem;">
+          <div style="display:flex;align-items:flex-start;gap:.75rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div style="font-size:.82rem;color:var(--text2);padding-bottom:1rem;"><strong style="color:var(--text);">Level 1 — Vocabulary:</strong> Basic Memoni nouns — Morning, Lunch, Evening, Family, Food, Colours. AR overlay + TTS audio on tap.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;">
+            <div class="tl-dot" style="background:var(--pink);margin-top:4px;"></div>
+            <div style="font-size:.82rem;color:var(--text2);"><strong style="color:var(--text);">Level 2 — Sentences:</strong> Subject-verb-object patterns, everyday greetings and phrases. Build real conversational Memoni.</div>
+          </div>
+        </div>
+        <a href="https://snapchat.com/t/pTRAYxQ9" target="_blank" rel="noopener" class="snap-btn snap-btn-primary" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.333 4.732-.061.136-.137 1.201.103 1.501.316.406 1.044.729 1.573.729.1 0 .202-.01.3-.033.1-.22.3-.35.53-.35.461 0 .964.392.964.861a.85.85 0 01-.59.799c-.063.029-1.593.588-2.054 2.384-.097.375-.384 1.534-3.997 1.534-.198 0-.398-.006-.597-.021-.12.069-1.143.635-1.982 1.42-.82.768-1.037 1.625-.766 2.373.292.804 1.186 1.326 2.16 1.326.28 0 .558-.046.822-.139l.03-.01c.066-.019.131-.028.195-.028.471 0 .856.409.856.913a.905.905 0 01-.855.913.84.84 0 01-.291-.05c-.37-.126-1.107-.297-2.073-.297-.648 0-1.343.107-2.042.43A3.498 3.498 0 0112 24c-.654 0-1.306-.168-1.908-.506-.699-.323-1.394-.43-2.042-.43-.966 0-1.703.171-2.073.297a.84.84 0 01-.291.05.905.905 0 01-.855-.913c0-.504.385-.913.856-.913.064 0 .13.009.195.028l.03.01c.264.093.542.139.822.139.974 0 1.868-.522 2.16-1.326.271-.748.054-1.605-.766-2.373-.839-.785-1.862-1.351-1.982-1.42a9.434 9.434 0 01-.597.021c-3.613 0-3.9-1.159-3.997-1.534C2.23 16.744.7 16.185.637 16.156a.85.85 0 01-.59-.799c0-.469.503-.861.964-.861.23 0 .43.128.53.35.098.023.2.033.3.033.529 0 1.257-.323 1.573-.729.24-.3.164-1.365.103-1.501-.07-1.513-.196-3.539.333-4.732C5.46 1.07 8.816.794 9.807.794c.44 0 .718.03.718.03s.275-.03.681-.03z"/></svg>
+          Try Meme_oni on Snapchat
+        </a>
+      </div>
+
+      <div class="card card-glow-pink reveal reveal-delay-1" style="padding:2.25rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;">
+          <div>
+            <div class="pill pill-pink mb-3">Level 3</div>
+            <h3 class="font-syne font-extrabold" style="font-size:2rem;letter-spacing:-.02em;">Memonix</h3>
+            <p style="font-size:.82rem;color:var(--text2);margin-top:.2rem;">Counting &amp; Numbers in AR</p>
+          </div>
+          <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(236,72,153,0.3),rgba(245,158,11,0.2));display:flex;align-items:center;justify-content:center;border:1px solid rgba(236,72,153,0.2);font-size:1.4rem;flex-shrink:0;">🔢</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.75rem;">
+          <div style="display:flex;align-items:flex-start;gap:.75rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><div class="tl-dot" style="background:var(--pink);"></div><div class="tl-line"></div></div>
+            <div style="font-size:.82rem;color:var(--text2);padding-bottom:1rem;"><strong style="color:var(--text);">Level 3 — Counting:</strong> Cardinal numbers 1–100, ordinal usage. Count real-world objects through the live AR camera feed.</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:.75rem;">
+            <div class="tl-dot" style="background:linear-gradient(135deg,var(--pink),#f59e0b);margin-top:4px;"></div>
+            <div style="font-size:.82rem;color:var(--text2);"><strong style="color:var(--text);">Culturally anchored:</strong> Chai cups, dates, and everyday Memoni objects serve as counting anchors — language meets lived reality.</div>
+          </div>
+        </div>
+        <a href="https://snapchat.com/t/3tviyFJl" target="_blank" rel="noopener" class="snap-btn snap-btn-secondary" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.333 4.732-.061.136-.137 1.201.103 1.501.316.406 1.044.729 1.573.729.1 0 .202-.01.3-.033.1-.22.3-.35.53-.35.461 0 .964.392.964.861a.85.85 0 01-.59.799c-.063.029-1.593.588-2.054 2.384-.097.375-.384 1.534-3.997 1.534-.198 0-.398-.006-.597-.021-.12.069-1.143.635-1.982 1.42-.82.768-1.037 1.625-.766 2.373.292.804 1.186 1.326 2.16 1.326.28 0 .558-.046.822-.139l.03-.01c.066-.019.131-.028.195-.028.471 0 .856.409.856.913a.905.905 0 01-.855.913.84.84 0 01-.291-.05c-.37-.126-1.107-.297-2.073-.297-.648 0-1.343.107-2.042.43A3.498 3.498 0 0112 24c-.654 0-1.306-.168-1.908-.506-.699-.323-1.394-.43-2.042-.43-.966 0-1.703.171-2.073.297a.84.84 0 01-.291.05.905.905 0 01-.855-.913c0-.504.385-.913.856-.913.064 0 .13.009.195.028l.03.01c.264.093.542.139.822.139.974 0 1.868-.522 2.16-1.326.271-.748.054-1.605-.766-2.373-.839-.785-1.862-1.351-1.982-1.42a9.434 9.434 0 01-.597.021c-3.613 0-3.9-1.159-3.997-1.534C2.23 16.744.7 16.185.637 16.156a.85.85 0 01-.59-.799c0-.469.503-.861.964-.861.23 0 .43.128.53.35.098.023.2.033.3.033.529 0 1.257-.323 1.573-.729.24-.3.164-1.365.103-1.501-.07-1.513-.196-3.539.333-4.732C5.46 1.07 8.816.794 9.807.794c.44 0 .718.03.718.03s.275-.03.681-.03z"/></svg>
+          Try Memonix on Snapchat
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal mb-5"><h3 class="font-syne font-bold" style="font-size:1.3rem;">Why <span class="grad-purple">Snapchat + AR?</span></h3></div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 reveal reveal-delay-1">
+      <div class="card" style="display:flex;gap:1rem;">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(168,85,247,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">⚡</div>
+        <div><div class="font-syne font-semibold" style="font-size:.88rem;margin-bottom:.2rem;">Zero Friction Access</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">No account, no download, no payment. Scan a Snapcode — start learning in seconds. Meets Gen Z exactly where they are.</div></div>
+      </div>
+      <div class="card" style="display:flex;gap:1rem;">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(236,72,153,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">📲</div>
+        <div><div class="font-syne font-semibold" style="font-size:.88rem;margin-bottom:.2rem;">Social by Default</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Learners share "card on head" moments to Snapchat Stories — private learning becomes public cultural pride.</div></div>
+      </div>
+      <div class="card" style="display:flex;gap:1rem;">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(34,211,238,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">🌍</div>
+        <div><div class="font-syne font-semibold" style="font-size:.88rem;margin-bottom:.2rem;">Real-World AR Context</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">Dual Coding Theory in practice — language appears in the user's real environment, anchoring words to lived experience.</div></div>
+      </div>
+      <div class="card" style="display:flex;gap:1rem;">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(251,191,36,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;">✨</div>
+        <div><div class="font-syne font-semibold" style="font-size:.88rem;margin-bottom:.2rem;">Making Memoni Cool Again</div><div style="font-size:.75rem;color:var(--text2);line-height:1.6;">High-tech AR reframes Memoni as modern and digital — not just something spoken in grandparents' living rooms.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-line"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="nav-logo" style="font-size:1.1rem;">MEME_ONI</div>
+    <div class="font-mono mt-1" style="font-size:.62rem;color:var(--text3);letter-spacing:.08em;">An HCI Project · Jinnah University for Women · 2024</div>
+    <div class="font-mono mt-1" style="font-size:.58rem;color:var(--text3);letter-spacing:.06em;">Ref: Snapchat Inc. (2024). Lens Studio documentation. docs.snap.com/lens-studio</div>
+  </div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+    <span class="pill">Sabrina Akbar</span>
+    <span class="pill pill-cyan">JUW46633</span>
+    <span class="pill pill-pink">Lens Studio</span>
+  </div>
+  <div class="font-mono" style="font-size:.62rem;color:var(--text3);">WCAG 2.2 AA · POUR · Dual Coding Theory</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        e.target.querySelectorAll && e.target.querySelectorAll('.bar-fill[data-w]').forEach(f => {
+          setTimeout(() => { f.style.transform = `scaleX(${parseFloat(f.dataset.w)})`; }, 150);
+        });
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(r => ro.observe(r));
+
+  // Bar charts in cards
+  document.querySelectorAll('.card').forEach(card => {
+    const fills = card.querySelectorAll('.bar-fill[data-w]');
+    if (!fills.length) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          fills.forEach(f => setTimeout(() => {
+            f.style.transform = `scaleX(${parseFloat(f.dataset.w)})`;
+          }, 200));
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.3 });
+    io.observe(card);
+  });
+
+  // Hero immediate reveal
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#hero .reveal').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 110);
+    });
+  });
+
+  // Nav active state
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const so = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => {
+          a.style.color = a.getAttribute('href') === `#${e.target.id}` ? 'var(--purple-l)' : 'var(--text2)';
+        });
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => so.observe(s));
+</script>
+</body>
+</html>
